@@ -120,6 +120,11 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
+# Crontab stuff
+CRONJOBS = [
+    ('*/1 * * * *', 'spam_mailing.scheduler.run_mailing')
+]
+
 CACHE_ENABLED = True
 if CACHE_ENABLED:
     CACHES = {

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Client(models.Model):
@@ -10,7 +11,7 @@ class Client(models.Model):
     comment = models.TextField(verbose_name="Комментарий", blank=True, null=True)
 
     def __str__(self):
-        return f"{self.first_name}, {self.last_name}, {self.middle_name}"
+        return f"{self.last_name}, {self.first_name}, {self.middle_name}"
 
     class Meta:
         verbose_name = "Клиент"
@@ -26,31 +27,40 @@ class Client(models.Model):
 
 
 class Mailing(models.Model):
+    objects = models.Manager()
     client = models.ManyToManyField(Client, verbose_name="Клиенты")
-    send_time = models.DateTimeField(verbose_name="Время отправки")
+    send_time = models.DateTimeField(default=timezone.now, verbose_name="Время отправки")
 
     frequency_choices = [
-        ('daily', 'Раз в день'),
-        ('weekly', 'Раз в неделю'),
-        ('monthly', 'Раз в месяц'),
+        ('ежедневно', 'Раз в день'),
+        ('еженедельно', 'Раз в неделю'),
+        ('ежемесячно', 'Раз в месяц'),
     ]
-    frequency = models.CharField(max_length=10, choices=frequency_choices, verbose_name="Рассылка")
+    frequency = models.CharField(max_length=15, choices=frequency_choices, verbose_name="Рассылка")
 
     status_choices = [
-        ('created', 'Создана'),
-        ('started', 'Запущена'),
-        ('completed', 'Завершена'),
+        ('создана', 'Создана'),
+        ('запущена', 'Запущена'),
+        ('завершена', 'Завершена'),
     ]
     status = models.CharField(max_length=10, choices=status_choices, verbose_name="Статус")
 
+    def __str__(self):
+        return f"Рассылка: {self.pk}"
+
 
 class Message(models.Model):
+    objects = models.Manager()
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, verbose_name="Рассылка")
     subject = models.CharField(max_length=255, verbose_name="Тема письма")
     body = models.TextField(verbose_name="Содержание письма")
 
+    def __str__(self):
+        return f"{self.subject}"
+
 
 class MailingLog(models.Model):
+    objects = models.Manager()
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, verbose_name="Рассылка")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время последней попытки")
     status = models.CharField(max_length=10, verbose_name="Статус попытки")
